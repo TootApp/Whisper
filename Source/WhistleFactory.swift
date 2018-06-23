@@ -46,7 +46,7 @@ open class WhistleFactory: UIViewController {
     
     view.addGestureRecognizer(tapGestureRecognizer)
 
-    NotificationCenter.default.addObserver(self, selector: #selector(WhistleFactory.orientationDidChange), name: NSNotification.Name.UIDeviceOrientationDidChange, object: nil)
+    NotificationCenter.default.addObserver(self, selector: #selector(WhistleFactory.orientationDidChange), name: UIDevice.orientationDidChangeNotification, object: nil)
   }
 
   public required init?(coder aDecoder: NSCoder) {
@@ -54,7 +54,7 @@ open class WhistleFactory: UIViewController {
   }
 
   deinit {
-    NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIDeviceOrientationDidChange, object: nil)
+    NotificationCenter.default.removeObserver(self, name: UIDevice.orientationDidChangeNotification, object: nil)
   }
 
   // MARK: - Configuration
@@ -88,12 +88,17 @@ open class WhistleFactory: UIViewController {
 
   func moveWindowToFront() {
     if self.view.isLikeIPhoneX {
-        whistleWindow.windowLevel = UIWindowLevelNormal
+        whistleWindow.windowLevel = .normal
     } else {
         let currentStatusBarStyle = UIApplication.shared.statusBarStyle
-        whistleWindow.windowLevel = UIWindowLevelStatusBar
+        whistleWindow.windowLevel = .statusBar
         UIApplication.shared.setStatusBarStyle(currentStatusBarStyle, animated: false)
     }
+    setNeedsStatusBarAppearanceUpdate()
+  }
+
+  open override var preferredStatusBarStyle: UIStatusBarStyle {
+    return UIApplication.shared.statusBarStyle
   }
 
   open func setupFrames() {
@@ -109,7 +114,7 @@ open class WhistleFactory: UIViewController {
         NSString(string: text).boundingRect(
           with: CGSize(width: labelWidth, height: CGFloat.infinity),
           options: NSStringDrawingOptions.usesLineFragmentOrigin,
-          attributes: [NSAttributedStringKey.font: titleLabel.font],
+          attributes: [NSAttributedString.Key.font: titleLabel.font],
           context: nil
         )
       titleLabelHeight = CGFloat(neededDimensions.size.height)
@@ -154,7 +159,7 @@ open class WhistleFactory: UIViewController {
         if let window = UIApplication.shared.windows.filter({ $0 != self.whistleWindow }).first {
           window.isHidden = false
           self.whistleWindow.isHidden = false
-          self.whistleWindow.windowLevel = UIWindowLevelNormal - 1
+          self.whistleWindow.windowLevel = UIWindow.Level.normal - 1
           window.rootViewController?.setNeedsStatusBarAppearanceUpdate()
         }
     })
